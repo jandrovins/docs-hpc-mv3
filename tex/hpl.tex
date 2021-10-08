@@ -16,13 +16,13 @@ En esta sección se expandió sobre las técnicas ganadoras. Se intentó ver a H
         \sqrt{(TotalMem \times (1024^3) \times Nodos) /8} \times 0.90
     \end{equation*}
     
-    En nuestros nodos, había alrededor de 61.3 GiB libres en cada uno. No se puede utilizar completamente esta cifra, pues los buffers de memoria y MPI necesitan espacio. El N que usamos fue 125440, que ocupa $~117.2 GiB$ en total.
+    En nuestros nodos, había alrededor de 61.3 GiB libres en cada uno. No se puede utilizar completamente esta cifra, pues los buffers de memoria y MPI necesitan espacio.
 	
 	\item \textbf{NB}: Define el tamaño del bloque para la distribución de datos. En general son menores a 256 y los mejores valores suelen ser múltiplos de 32 \cite{netlib-hpl-faq}. Además, se consideró que lo mejor es que N fuera divisible entre NB, para hacer un uso más eficiente de la memoria. Para este trabajo se estableció un valor de 256, ya que en varias fuentes se evidenció que era el mejor para nuestro procesador.
 	
 	\item \textbf{P$\times$Q}: El producto de \textbf{P} y \textbf{Q} es la cantidad de procesos que HPL va a utilizar. \textbf{Q} debe ser un poco mayor de \textbf{P}.
 	
-	Para la versión de Intel HPL, la cantidad óptima de procesos es la cantidad de sockets que se tienen. En nuestra configuración, el óptimo es 4.
+	Para la versión de Intel HPL, la cantidad óptima de procesos es la cantidad de sockets que se tienen.
 	
 	\item Panel Factorization: Hay tres opciones para factorizar el panel: left, crout, y right. Depende de la máquina de cual opción es la mejor. Para nuestros nodos la opción mas rápida fue right. Esto se puede modificar cambiando los PFACs.
     \item Recursion Factorization: Hay tres opciones para factorizar la recursión: left, crout, y right. Depende de la maquina cual es la mejor opción. Para nuestros nodos la opción más rápida fue right. Esto se puede modificar cambiando los RFACs.
@@ -31,20 +31,6 @@ En esta sección se expandió sobre las técnicas ganadoras. Se intentó ver a H
     \item Update: Hay dos formas de update binary-exchange y long. Long normalmente es mejor para problemas mas grandes. Esto lo puedes cambiar cambiando el número del SWAP. Además se puso el threshold swapping en 128.
 	
 \end{itemize}
-
-\subsection{Mantenimiento a la disipación de calor}
-Durante algunas ejecuciones del HPL se obtuvieron diferentes advertencias por el recalentamiento de las CPUs. Para ello se hicieron algunas modificaciones en el BIOS del sistema, específicamente en una opción llamada \textit{Thermal configuration}, en la que se cambió el valor de \textit{Optimal cooling} a \textit{Maximum cooling}. Esto ayudó a que el sistema de refrigeración trabajara al máximo.
-
-Sin embargo, analizando el comportamiento de la CPU se pudo envidenciar que uno de los procesadores de uno de los servidores tenía menor frecuencia que el otro procesador, y la diferencia de FLOPS era lo suficientemente relevante como para hacer algo al respecto. Hay que tener en cuenta que la frecuencia está directamente relacionada con el performance.
-
-Por tal motivo, se pensó que el calor podría estar influyendo en el comportamiento del procesador, entonces se revisó la temperatura de cada uno con iLO. Allí se pudo comprobar que el procesador con menor rendimiento tenía una temperatura más elevada que el otro.\\
-
-\includegraphics[width=8cm]{Temperatura.png}
-
-Para tratar este problema lo mejor que se pensó fue cambiar la pasta de disipación de calor en cada una de los procesadores, entonces se realizó mantenimiento a estos en el centro de computación científica Apolo de la universidad EAFIT.\\
-
-
-\includegraphics[width=8cm]{Compute-1-1.png}
 
 \subsection{Flags de compilación}
 Para optimizar la compilación de HPL de Intel se usaron varias flags de compilación.
@@ -64,19 +50,6 @@ Para optimizar la compilación de HPL de Intel se usaron varias flags de compila
     \item -Wall: Pone diagnósticos de warning y error.
     \item -fPIC: Determina si el compilador código es de posición independiente.
 \end{itemize}
-
-\subsection{Swappinness a 0}
-El swappinness es la tendencia del kernel de Linux a mover los datos de la memoria principal a la memoria SWAP. El kernel tiene un parámetro que determina el swappinnes. Se configuró para que no hiciera swapping a menos que fuera estrictamente necesario. Esto es útil porque en los casos en que HPL hace que la RAM quede con 1\% de memoria, que asegura de que no se estarán moviendo datos de HPL a SWAP, lo que dañaría dramáticamente el performance.
-
-\subsection{Binding y Pinning}
- Una de las arquitecturas más comunes que se pueden encontrar hoy en día para las memorias es Non-Uniform Memory Access (NUMA). En esta cada nodo NUMA tiene su grupo de memorias RAM. La velocidad de acceso a memoria no solamente esta ligado a la jerarquía de memoria, sino también al lugar donde se encuentre el dato que se quiera acceder \cite{Meta-Volante-0} Por lo tanto, las aplicaciones de HPC pueden ser optimizadas mediante una técnica llamada \textit{binding} o \textit{pinning} fijando cómo se distribuyen los subprocesos en la memoria. Estos son fijados (pinned) con ciertas variables de entorno en MPI. En nuestro caso se utilizan dos \textit{I\_MPI\_PIN\_DOMAIN} que define un conjunto separado de CPUs en un solo nodo (dominio) y \textit{I\_MPI\_PIN\_ORDER} que indica el orden en el que los procesos MPI se asociarán con los dominios \cite{biding-pinning}. Dichas variables se inicializaron con los siguientes comandos:
-
- \begin{itemize}
- \item export I\_MPI\_PIN\_DOMAIN="numa"
- \item export I\_MPI\_PIN\_ORDER="compact"
- \end{itemize}
-
-La opción "numa" indica que los procesos se mantienen dentro de un dominio NUMA. Mientras que "compact" asigna los hilos de forma que queden lo más cercanos posible.
 
 \subsection{Variables de ambiente de MPI}
 
@@ -134,67 +107,53 @@ También se realizaron optimizaciones sobre los algoritmos utilizados para reali
     \end{itemize}
 \end{itemize}
 
-Finalmente se hizo que la ejecución corriera sobre los 2 nodos que fueron asignados utilizando slurm mediante los comandos:
-\begin{itemize}
-    \item export I\_MPI\_HYDRA\_HOSTS\_GROUP=compute-1-[1-2]
-    \item export I\_MPI\_HYDRA\_BOOTSTRAP=slurm
-\end{itemize}
+\section{High Performance Linpack Benchmark}
 
-\subsection{BIOS}
-
-La configuración que se realizó en el BIOS fue la siguiente:
-
-\begin{itemize}
-    \item \textbf{Turbo Boost:} Enabled
-    \item \textbf{Hp power profile:} Maximum performance
-    \item \textbf{HP power regulator:} High performance 
-    \item \textbf{Thermal Shutdown:} Disabled
-    \item \textbf{Thermal configuration:} Maximum cooling
-    \item \textbf{HP power profile:} Maximum performance
-    \item \textbf{Thermal configuration:} Maximum cooling
-    \item \textbf{ACPI SLIT preferences}
-    \item \textbf{Intel performance counter monitor:} Enabled
-    \item \textbf{Thermal Shutdown:} Disabled
-\end{itemize}//
-\includegraphics[width=8cm]{BIOS.png}
-
-Los cambios realizados respecto a la configuración predeterminada fueron activar el maximun cooling, habilitar las ACPI SLIT preferences, el Intel performance counter monitor y deshabilitar el thermal shutdown.
-
-\subsubsection{Mejoras con BIOS}
-
-Al realizar los cambios en el BIOS en uno de los nodos (compute 1-2), se pudo observar una mejora en la velocidad de los ciclos con respecto al otro nodo (compute 1-1).
-
-\subsection{Infiniband y modo datagrama}
-
-El modo datagram es una configuración que tienen las tarjetas infiniband para modificar la manera en la que maneja los paquetes IP. El equipo 3 y notros usamos tests de ancho de banda de Infiniband juntos, para determinar cuál de las 2 opciones es mejor; el modo datagram o el modo connected. 
-
-Haciendo tests con qperf \cite{tutorial-qperf}, se determino que el modo datagrama arroja un mayor ancho de banda.
-
-\subsection{Eliminar servicios que sobran}
-
-Se eliminaron servicios de RPC utilizando el comando:
-\begin{itemize}
-    \item systemctl mask --now rpc-statd.service rpcbind.service rpcbind.socket
-\end{itemize}
-También se eliminaron los siguientes servicios y daemons:
-\begin{itemize}
-    \item \textbf{polkit:} Servicio para manejar la autenticación en el SO.
-    \item \textbf{crond:} Daemon que ejecuta periodicamente scripts en el SO.
-    \item \textbf{chronyd:} Servicio de sincronización del reloj.
-    \item \textbf{gssproxy:} Daemon para manejar acceso a credenciales GSSAPI.
-    \item \textbf{rsyslog:} Servicio para recolectar logs de otros servicios.
-    \item \textbf{sssd:} Daemon de servicios de sistema de seguridad.
-    \item \textbf{munge:} Servicio que se encarga de la autenticación de slurm.
-    \item \textbf{slurmd:} Servicio de monitoreo de tareas corriendo en un nodo.
-    \item \textbf{slurmctld:} Servicio que monitorea otros daemons de slurm.
-\end{itemize}
-Estos se eliminaron con el comando:
-\begin{itemize}
-    \item systemctl stop polkit crond chronyd gssproxy rsyslog sssd munge slurmd slurmctld
-\end{itemize}
+Usamos el benchmark HPL incluido en la biblioteca OneAPI; este punto de referencia está disponible en
+\textit{oneapi/mkl/2021.4.0/benchmarks/mp\_linpack/}.
+El directorio mencionado anteriormente incluye: (1)
+\textit{xhpl\_intel64\_dynamic}: un binario de referencia HPL listo para usar; (2) \textit{runme\_intel64\_dynamic}: un script de shell donde se establecen las variables de entorno MPI, aquí el binario de referencia HPL se llama con la biblioteca MPI; (3) \textit{HPL.dat}: el archivo de parámetros de HPL.
 
 \section{Resultado sorprendente}
 
-Después de todo este trabajo de optimización se pudo obtener un resultado 642.747 GFLOPs, equivalente a una eficiencia de 92.99\%.\\
+Después de todo este trabajo de optimización se pudo obtener un resultado 953.95 GFLOPs, equivalente a una eficiencia de 95.54\%.\\
 
-\includegraphics[width=8cm]{GFLOPS642.png}
+\includegraphics[width=8cm]{GFLOPS953.png}
+
+
+\section{Quantum Exact Simulation Toolkit (QuEST)}
+
+QuEST es un simulador de circuito cuántico que representa el estado del sistema cuántico utilizando vectores y matrices de densidad.
+
+La descripción del estado de un sistema cuántico de $n$ qubits requiere $2^{n}$ números complejos. Por lo tanto, se cree que la complejidad subyacente en la simulación de computadoras cuánticas utilizando máquinas clásicas es exponencial con respecto al número de qubits.\cite{jones2019quest}.
+
+\subsection {Informe de optimizaciones del compilador}
+
+Para conocer las optimizaciones automáticas realizadas por el compilador en el código fuente de QuEST, se colocó la marca de informe de optimización del rendimiento, \textit{-qopt-report = 5}, además de las otras marcas del compilador Intel C.
+Para esta utilidad de informe se consideró el nivel de informe más alto (cinco).
+Esta utilidad de informes genera varios archivos \textit{.optrpt}, uno por archivo \textit{.cpp} en QuEST.\cite{meta2}
+
+\subsection{Optimizaciones de rendimiento}
+
+Ejecutamos los problemas ronda preliminar random.c, GHZ QFT y el problema 4 usando solo procesos MPI Distribuido. El rendimiento entregado en la configuración distribuida se utilizó como línea base para el cálculo de la aceleración y la validación de cada mejora de rendimiento.
+La primera mejora de rendimiento aplicada fue la adición de Multi-threading, que se aplicó agregando soporte para multi-threading en el archivo QuEST makefile de cada problema.
+
+\subsection{Variables de ambiente de MPI y SLURM}
+
+\begin{itemize}
+  \item export OMP\_NUM\_THREADS=16
+  \item export I\_MPI\_CC=icx
+  \item export I\_MPI\_PMI\_LIBRARY=/opt/slurm/20.11.5/lib/libpmi2.so
+  \item export SLURM\_CPU\_BIND="quiet,boards"
+  \item export SLURM\_PMI\_KVS\_NO\_DUP\_KEYS=1
+  \item export SLURM\_MPI\_TYPE=pmi2
+  \item export CC=icx
+  \item export CXX=icpx
+  \item export FC=ifort
+  \item export F90=ifort
+  \item export F77=ifort
+  \item export MPIF90=mpiifort
+  \item export LD=ld
+  \item export AR=ar
+  \item export UCX\_NET\_DEVICES=mlx4\_0:1
+\end{itemize}
