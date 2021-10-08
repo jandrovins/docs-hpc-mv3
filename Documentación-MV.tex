@@ -96,6 +96,52 @@
 	\item \textbf{Drivers de Infiniband}: Mellanox OFED 4.9 LTS.
 \end{itemize}
 
+% \section{High Performance Linpack Benchmark}
+
+% We used the HPL benchmark included in the OneAPI library; this benchmark is available at \textit{oneapi/mkl/2021.3.0/benchmarks/mp\_linpack/}.
+% The aforementioned directory includes: (1) \textit{xhpl\_intel64\_dynamic}: a ready to use HPL benchmark binary; (2) \textit{runme\_intel64\_dynamic}: a shell script where the MPI environment variables are set, here the HPL benchmark binary is called with the MPI library; (3) \textit{HPL.dat}: the HPL parameters file; and other auxiliary files \cite{Contents99:online}.
+% In order to understand the HPL parameters, we used the information given in \cite{HPLTunin60:online,HighPerf40:online}.
+% In addition, the Intel documentation \cite{Configur92:online} was used to set the recommended values for $P$, $Q$, $N$, and $NB$.
+% The results of the benchmark are given in the HPL folder attached to this document.
+
+
+% % Please add the following required packages to your document preamble:
+% % \usepackage{booktabs}
+% % \usepackage{graphicx}
+% \begin{table}[h]
+% \centering
+% \caption{HPL Performance}
+% \label{tab:hpl}
+% \resizebox{0.25\textwidth}{!}{%
+% \begin{tabular}{@{}lll@{}}
+% \toprule
+% \textbf{\#Nodes} & 11 & 16 \\ \midrule
+% \textbf{P} & 2 & 4 \\ \midrule
+% \textbf{Q} & 11 & 8 \\ \midrule
+% \textbf{N} & 278272 & 343040 \\ \midrule
+% \textbf{Time (s)} & 4242.39 & 5335.71 \\ \midrule
+% \textbf{CPU (GHz)} & 2.60 & 2.60 \\ \midrule
+% \textbf{Rmax (GFLOPS)} & 3386.18 & 5043.75 \\ \midrule
+% \textbf{Rpeak (GFLOPS)} & 3660.80 & 5324.80 \\ \midrule
+% \textbf{Efficiency} & 92\% & 95\% \\ \bottomrule
+% \end{tabular}%
+% }
+% \end{table}
+
+% \small
+% \begin{align*} \label{eq:rpeak}
+%     R_{peak} = \#Nodes * \frac{\#CPU}{Node} * \frac{\#Cores}{CPU} * \frac{Frequency}{Core} * \frac{\#FLOPs}{Cycle}
+% \end{align*}
+
+% \section{Quantum Exact Simulation Toolkit (QuEST)}
+
+% QuEST is a quantum circuit simulator that represents the state of the quantum system using vectors and density matrices.
+% The description of the state of a $n$ qubits quantum system requires $2^{n}$ complex numbers.
+% Thus, the underlying complexity in the simulation of quantum computers using a classical machines is believed to be exponential with respect to the number of qubits \cite{jones2019quest}.
+% In subsequent paragraphs, we will describe the performance profile conducted in the QuEST 3.2.0 \cite{Releasev90:online} library.
+% For the analysis and optimization of QuEST, we considered eighth nodes in spite of 16 due to the higher failure rate presented on the Cronos cluster.  
+
+
 \section{Estudio de performance}
 
 El máximo performance teórico de nuestro cluster está determinado por la siguiente fórmula. 
