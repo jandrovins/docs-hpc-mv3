@@ -1,0 +1,38 @@
+\section{El camino a ser los mejores}
+
+\begin{enumerate}
+	\item \textbf{Backups}. Diarios, para que no se pierda nada importante.
+	\item \textbf{Montar NFS}.
+	\item \textbf{Instalar drivers de Mellanox}.
+	\item \textbf{Instalar SLURM}. Esto nos sirvió para coordinar nuestras ejecuciones cuando se trabajo individualmente.
+	\item \textbf{Instalar Intel}. Se instalo Intel OneAPI \cite{intel-oneapi} Base y HPC toolkits, que traían consigo Intel MPI \cite{intel-mpi} e Intel MKL \cite{intel-mkl-blas}. 
+	\item \textbf{Resultados base}. Se ejecuto HPL usando MKL e Intel MPI usando la versión base de HPL. Estos resultados nos sirvieron para saber nuestro punto de partida cuando se uso el HPL de Intel.
+	\item \textbf{Optimización con Intel HPL}. Es la fase donde empezamos a ejecutar  autotuners en masa que nos pudieran mostrar los valores óptimos de la configuracion de HPL.
+\end{enumerate}
+
+\subsection{Backups}
+Al momento de trabajar con un cluster que tiene bastante tiempo de funcionamiento es posible perder el trabajo realizado, ya que puede fallar definitivamente, estropenado la información del disco \cite{Meta-Volante-0}. Para evitar que se arruine el progreso obtenido es recomendable hacer Backups frecuentemente. Nosotros decidimos hacerlos todos los días. Por lo tanto, estas copias se harán en el servidor \verb|cronos.eafit.edu.co| reservadas para el usuario \verb|proxyjump|. \cite{Meta-Volante-0}.
+
+Para el trabajo se hicieron las sincronizaciones con Rsync. Esta es una herramienta para realizar sincronización de archivos remotos y locales, usando un algoritmo que solo copia los archivos que cambiaron, optimizando el uso de recursos en la máquina. Además, para ejecutar este trabajo automáticamente se programó un archivo bash que fue corrido desde \textit{Crontab}, el cual permite hacer tareas con la frecuencia que se elija mediante ciertos comandos \cite{crontab}. 
+
+\subsection{Montar NFS}
+Un \textit{sistema de archivos de red (NFS por su siglas en inglés)} permite acceder a un sistema de archivos remotos a través de la red, facilitando la administración de recursos en servidores centralizados \cite{nfs-tutorial}. Este sistema es requerido por MPI para su correcto funcionamiento. NFS funciona bastante bien para un número reducido de nodos, pero hay mejores opciones como GlusterFS o Lustre \cite{Meta-Volante-0}. Nuestro servidor NFS estuvo montado en el \verb|compute-1-1| y el cliente en \verb|compute-1-2|.
+
+\subsection{Infiniband}
+
+
+Infiniband es una conexión para acelerar la comunicación entre nodos. En la instalación de Infiniband se usó el driver Mellanox. Se instaló la versión SRC, de modo que nos permitiera compilar todos los paquetes para nuestra versión se kernel específica. Se activó en tiempo de instalación RDMA, NFSoRDMA e IPoIB. Se activó también la instalación de todos los paquetes que vienen con los drivers.
+
+\subsection{Intel}
+ Se instaló Intel porque puede compilar aplicaciones para que funcionen mejor con el hardware y además trae una versión optimizada de HPL. Instalar Intel es fácil, solo se descarga y se corre el bash para construirlo. Más adelante se mostrarán los flags de compilación y variables de ambiente para mejorar la compilación y ejecución de HPL con Intel.\cite{intel-oneapi}
+
+\subsection{Paquetes} 
+
+Para instalar estas aplicaciones y otras se tuvieron que incluir múltiples paquetes. Los paquetes que se instalaron fueron usados para poder instalar los drivers y las aplicaciones. Además se instalaron varios paquetes para optimizar la comunicación de los nodos. Todos los paquetes instalados están en el documento Paquetes.txt.zip.
+\subsection{Slurm}
+Slurm es un sistema de control para supercomputadores. Permite controlar los procesos de manera que corran con todos los recursos que necesitan. Slurm hay que instalarlo en los dos nodos. La instalación de Slurm se debe hacer después de instalar NFS. Además de esto hay que instalar \verb|munge| para usar su servicio de autenticación. Para compilar Slurm se usó \verb|march-native|, que optimiza la ejecución de Slurm.
+
+Se configuró Slurm desactivando el soporte para \verb|cgroup|, para estar seguros que no se restringían los recursos en las ejecuciones.
+
+\subsection{Montar NTP}
+NTP es un protocolo usado para sincronizar los relojes de las computadoras dentro de una red. Para ello se usará la aplicación Chrony, la cual se instaló usando el manejador de paquetes. De esta forma, se sincronizó \verb|compute-1-1| a la hora oficial de Bogotá usando el servidor \verb|3.co.pool.ntp.org|. Después, se usó \verb|compute-1-1| como servidor para \verb|compute-1-2|.
