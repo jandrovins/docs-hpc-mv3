@@ -1,0 +1,24 @@
+\section{Entorno del cluster}\label{OurOwnCluster}
+
+\subsection{Hardware}\label{OurOwnCluster:HardwareEnvironment}
+\begin{itemize}
+	\item \textbf{Cantidad de nodos:} 3$\times$ProLiant SL230s Gen8.
+	\item \textbf{Procesadores por nodo:} 3$\times$CPU Intel\textregistered Xeon\textregistered CPU.
+    E5-2670, 8 núcleos por procesador, hyperthreading desactivado.
+	\item \textbf{Controlador Infiniband: } Mellanox Technologies MT27500 Family ConnectX-3
+	\item \textbf{Memoria por nodo:} 16 x 4GB DIMM DDR3 1333 M3T/s.
+\end{itemize}
+
+\subsection{Software}\label{OurOwnCluster:SoftwareEnvironment}
+
+\begin{itemize}
+    \item \textbf{Intel OneAPI} \cite{intel-oneapi}.
+	\item \textbf{HPL 2.3 Intel version} \cite{intel-hplversion}.	
+	\item \textbf{Operating system:} Centos 8.2 \cite{centos}.
+	\item \textbf{BLAS:} BLAS en MKL \cite{intel-mkl-blas}.
+	\item \textbf{MPI:} Intel MPI \cite{intel-mpi}.
+    \item \textbf{Compilador:} Intel C Compiler (envuelto por Intel MPI) \cite{intel-compiler}.
+	\item \textbf{NFSv4} \cite{nfs-tutorial}.
+	\item \textbf{Manejador de recursos}: Slurm 20.11.8 \cite{slurm20-11-8}.
+	\item \textbf{Drivers de Infiniband}: Mellanox OFED 4.9 LTS.
+\end{itemize}
